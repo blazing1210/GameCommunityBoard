@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+<style>
+	
+	#ul-header{
+		list-style : none;
+		margin:0px;
+		background:rgba(80,80,80,0.2);
+
+	}
+	#ul-header li{
+		display : inline-block;  
+
+	}
+	
+	#comment-header{
+		list-style : none;
+		margin:0px;
+		background:rgba(80,80,80,0.1);
+	}
+	
+	#comment-header li{
+		display : inline-block;  
+
+	}
+	.comment-article{
+		font-size:13px;
+	}
+	
+	.comment-title{
+		background:rgba(80,80,80,0.1);
+	}
+	.update-input{
+		border:none;
+		border-right:0px; 
+		border-top:0px; 
+		boder-left:0px;
+		boder-bottom:0px;
+
+	}
+	#update-input:focus{
+		outline:none;
+	}
+</style>
+<script>
+		//댓글삭제함수
+		function deleteF(num){
+			$.ajax({
+				url : "/userBoard/comment",
+				type: "delete",
+				data : {idx:num},
+				success : function(){
+					alert("성공");
+					location.reload();
+				},
+				error : function(request,status,error){
+					alert("코드 ="+request.status+"메세지="+request.responseText+"error = "+error);
+				}
+			});	
+		};
+
+	$(document).ready(function(){
+		
+		
+		
+		var Idx = $("#idx").val();
+		//목록으로가기
+		$("#list-btn").on("click",function(){
+			location.href="/userBoard";
+		});
+		
+		//글수정
+		$("#update-btn").on("click",function(){
+			location.href="/userBoard/update/"+Idx;
+		});
+		
+		//글삭제
+		$("#delete-btn").on("click",function(){
+			$.ajax({
+				url:"/userBoard/update/"+Idx,
+				data:{idx : Idx},
+				type:"delete",
+				success:function(){
+					alert("삭제되었습니다")
+					location.href="/userBoard";
+				},
+				error:
+					function(){
+						alert("ajax통신오류");
+					}
+			})
+		});
+		//추천
+		$("#tbU-btn").on("click",function(){
+			$.ajax({
+				url:"/userBoard/update/tbup",
+				data:{idx : Idx},
+				type:"put",
+				success:function(){
+					alert("이 게시글을 추천하였습니다.");
+					location.reload();
+				},
+				error:
+					function(request,status,error){
+					alert("code = "+ request.status + " message = " + request.responseText + " error = " + error);
+					}
+			});
+		});
+		//비추천
+			$("#tbD-btn").on("click",function(){
+				$.ajax({
+					url:"/userBoard/update/tbdown",
+					data:{idx : Idx},
+					type:"put",
+					success:function(){
+						alert("이 게시글을 비추천하였습니다");
+						location.reload();
+					},
+					error:
+						function(request,status,error){
+						alert("code = "+ request.status + " message = " + request.responseText + " error = " + error);
+					}
+				});
+			});
+		
+		$("#reply-btn").on("click",function(){
+			$("#reply-form").submit();
+		});	
+		
+		$("#comment-insert-btn").on("click",function(){
+			$.ajax({
+				url:"/userBoard/comment",
+				type:"post",
+				data:{comment : $("#comment").val(),creatorId : $("#userId").val(),boardKey:$("#idx").val()},
+				success:function(){
+					alert("댓글입력성공");
+					location.reload();
+				},
+				error:function(request,status,error){
+					alert("코드 ="+request.status+"메세지="+request.responseText+"error = "+error);
+				}
+			});	
+		});
+		
+		
+	});
+</script>
+<title>공지사항 상세보기</title>
+</head>
+<body>
+	<header th:replace="layout/header :: header('자유게시판')">
+	</header>
+ 
+	 <main class="container">
+	 	<header class="border rounded">
+	 		<h6 class="m-3">
+	 			<span class="me-2 text-secondary">일반</span>
+	 			<span id="title" th:text="${board.title}">안녕하세요</span>
+	 		</h6>
+	 		<div class="border-top" id="header-div">
+	 			<ul id="ul-header" class="p-2">
+	 				<li>
+		 				<span><i class="bi bi-person-circle"></i></span>
+		 				<span id="creatorId" class="ms-2" th:text="${board.creatorId}">jsw</span>
+	 				</li>
+	 				<li class="float-end ms-5">
+		 				<i class="bi bi-eye-fill"></i>
+		 				<span id="cnt" th:text="${board.cnt}">23</span>
+	 				</li>
+	 				<li id="createdDt" class="float-end" th:text="${board.createdDt}">13245615112s</li>
+	 			</ul>
+	 		</div>
+	 	</header>
+	 	
+		
+	 	<section class="my-4">
+	 		
+	 			<p class="p-3" th:text="${board.content}">본문내용 입니다.</p>
+	 			
+	 			<div class="d-flex flex-row justify-content-center my-3 pt-5">
+	 				<button type="button" class="btn-danger" id="tbU-btn">
+		 				<i class="bi bi-hand-thumbs-up"></i>
+		 				<span class="ms-2" th:text="${board.thumbsUp}">2</span>
+	 				</button>
+	 				<button type="button" class="btn-primary ms-2" id="tbD-btn">
+		 				<i class="bi bi-hand-thumbs-down"></i>
+		 				<span class="ms-2" th:text="${board.thumbsDown}">2</span>
+	 				</button>	
+	 		</div>
+	 	</section>
+	 	<hr>
+	 	
+
+	 	<section>
+	 		<form action="/userBoard/reply" method="get" id="reply-form">
+		 		<input type="hidden" name="idx" id="idx"th:value="${board.idx}">
+		 		<input type="hidden" name="originNo" id="originNo"th:value="${board.originNo}">
+		 		<input type="hidden" name="groupOrd" id="groupOrd"th:value="${board.groupOrd}">
+		 		
+		 		<button type="button" class="btn btn-primary float-end ms-2" id="list-btn" >목록</button>
+		 		<button type="button" class="btn btn-secondary float-end ms-2" id="delete-btn" th:if="${session.userId}==${board.creatorId}or${session.level}==1">삭제</button>
+		 		<button type="button" class="btn btn-warning float-end" id="update-btn" th:if="${session.userId}==${board.creatorId}or${session.level}==1">수정</button>
+		 		<button type="button" class="btn btn-info" id="reply-btn" th:if="${session.userId}!=null">답글쓰기</button>
+	 		</form>
+	 	</section>
+	 	
+		<!--댓글구현-->
+	 	<section class="my-5">
+	 		<div id="comment-header" class="mx-1 my-3">
+	 			<ul class="p-2">
+	 				<li>댓글 <span class="text-danger ms-1" th:text="${#lists.size(commentList)}">1</span></li>
+	 				<li class="float-end me-2">스크랩</li>	 				
+	 				<li class="float-end me-2">공유</li>
+	 				<li class="float-end me-2">신고</li>
+	 			</ul>
+	 		</div>
+	 		
+	 		<div class="border border-secondary rounded my-4 comment-article" th:each="comment : ${commentList}">
+			 		<div class="p-2 comment-title" >
+			 			<span class="me-2" th:text="${comment.creatorId}">glan</span>
+			 			<span th:text="${comment.createdDt}">23:14:14:50</span>
+			 			<button type="button"class="btn btn-close btn-sm float-end" th:onclick="'deleteF('+${comment.idx}+')'" 
+			 			th:if="${session.userId}==${comment.creatorId}or${session.level}==1"></button>
+			 		</div>
+		 		<div class="border-top border-secondary">
+		 			<p class="p-2" th:text="${comment.comment}">d</p>
+<!-- 	 				<textarea cols="2"class="update-input p-2 form-control"></textarea> -->
+		 		</div>
+	 		</div>	
+	 			<hr>
+		 		<div class="border border-secondary my-4 comment-article" th:if="${session.userId!=null}">
+		 			<div class="p-2 comment-title" >
+			 			<span class="me-2">댓글쓰기</span>
+			 		</div>
+			 		<div class="border-top border-secondary d-grid">
+			 			<input type="hidden"id="userId" th:value="${session.userId}">
+				 		<textarea id="comment"cols="2"class="update-input p-2 form-control"></textarea>
+				 		<button id="comment-insert-btn"class="btn btn-secondary btn-sm">댓글 등록</button>
+			 		</div>
+		 		</div>
+	 	</section>
+	 </main>
+	 
+	 <footer th:replace="layout/footer :: footer">
+	 </footer>			
+</body>
+</html>

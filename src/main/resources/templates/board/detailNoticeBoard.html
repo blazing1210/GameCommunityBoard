@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+<style>
+	
+	#ul-header{
+		list-style : none;
+		margin:0px;
+		background:rgba(80,80,80,0.4);
+
+	}
+	#ul-header li{
+		display : inline-block;  
+
+	}
+</style>
+<script>
+	$(document).ready(function(){
+		
+		var Idx = $("#idx").val();
+		
+		$("#list-btn").on("click",function(){
+			location.href="/noticeBoard";
+		});
+		
+		$("#update-btn").on("click",function(){
+			location.href="/noticeBoard/update/"+Idx;
+		});
+		
+		$("#delete-btn").on("click",function(){
+			$.ajax({
+				url:"/noticeBoard/update/"+Idx,
+				data:{idx : Idx},
+				type:"delete",
+				success:function(){
+					alert("삭제되었습니다")
+					location.href="/noticeBoard";
+				},
+				error:
+					function(){
+						alert("ajax통신오류");
+						
+					}
+			})
+		});
+		
+		$("#tbU-btn").on("click",function(){
+			$.ajax({
+				url:"/noticeBoard/update/tbup",
+				data:{idx : Idx},
+				type:"put",
+				success:function(){
+					alert("이 게시글을 추천하였습니다.");
+					location.reload();
+				},
+				error:
+					function(request,status,error){
+					alert("code = "+ request.status + " message = " + request.responseText + " error = " + error);
+					}
+			});
+		});
+			$("#tbD-btn").on("click",function(){
+				$.ajax({
+					url:"/noticeBoard/update/tbdown",
+					data:{idx : Idx},
+					type:"put",
+					success:function(){
+						alert("이 게시글을 비추천하였습니다");
+						location.reload();
+					},
+					error:
+						function(request,status,error){
+						alert("code = "+ request.status + " message = " + request.responseText + " error = " + error);
+					}
+				});
+			});
+			
+	});
+</script>
+<title>공지사항 상세보기</title>
+</head>
+<body>
+	<header th:replace="layout/header :: header('공지사항')">
+	</header>
+ 
+	 <main class="container">
+	 	<header class="border rounded">
+	 		<h6 class="m-3">
+	 			<span class="me-2 text-secondary">공지사항</span>
+	 			<input type="hidden" name="idx" id="idx"th:value="${board.idx}">
+	 			<span th:text="${board.title}">안녕하세요</span>
+	 		</h6>
+	 		<div class="border-top" id="header-div">
+	 			<ul id="ul-header" class="p-2">
+	 				<li id="creatorId">
+	 				<span><i class="bi bi-person-circle"></i></span>
+	 				<span class="ms-2" th:text="${board.creatorId}">jsw</span>
+	 				</li>
+	 				<li id="cnt" class="float-end ms-5">
+	 				<i class="bi bi-eye-fill"></i>
+	 				<span th:text="${board.cnt}">23</span>
+	 				</li>
+	 				<li id="createdDt" class="float-end" th:text="${board.createdDt}">13245615112s</li>
+	 			</ul>
+	 		</div>
+	 	</header>
+	 	<section class="my-4">
+	 		
+	 			<p class="p-3" th:text="${board.content}">본문내용 입니다.</p>
+	 			
+	 		<div class="d-flex flex-row justify-content-center my-3 pt-5">
+	 				<button type="button" class="btn-danger" id="tbU-btn">
+		 				<i class="bi bi-hand-thumbs-up"></i>
+		 				<span class="ms-2" th:text="${board.thumbsUp}">2</span>
+	 				</button>
+	 				<button type="button" class="btn-primary ms-2" id="tbD-btn">
+		 				<i class="bi bi-hand-thumbs-down"></i>
+		 				<span class="ms-2" th:text="${board.thumbsDown}">2</span>
+	 				</button>	
+	 		</div>
+	 	</section>
+	 	<hr>
+	 	<section>
+	 		<button type="button" class="btn btn-primary float-end ms-2" id="list-btn">목록</button>
+	 		<button type="button" class="btn btn-secondary float-end ms-2" id="delete-btn" th:if="${session.level}==1">삭제</button>
+	 		<button type="button" class="btn btn-warning float-end" id="update-btn" th:if="${session.level}==1">수정</button>
+	 	</section>
+	 </main>
+	 
+	 <footer th:replace="layout/footer :: footer">
+	 </footer>			
+</body>
+</html>
