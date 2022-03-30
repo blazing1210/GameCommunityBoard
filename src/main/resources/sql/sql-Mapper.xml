@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bitc.java.mapper.BoardMapper">
+	<!-- 공지사항 불러오기-->
+	<select id="openNoticeBoard" resultType="com.bitc.java.dto.NoticeBoardDto">
+		<![CDATA[ 
+			SELECT
+				*			
+			FROM
+				notice_board
+			ORDER BY 
+				idx
+			DESC		
+		]]>
+	</select>
+	
+	<!-- 공지사항 올리기-->
+	<insert id="insertNoticeBoard" parameterType="com.bitc.java.dto.NoticeBoardDto">
+		<![CDATA[ 
+			INSERT INTO
+				notice_board(title,creator_id,created_dt,content)
+			VALUES
+				(#{title},#{creatorId},NOW(),#{content})
+		]]>
+	</insert>
+	<!-- 공지사항 상세보기 -->
+	<select	id="openDetailNoticeBoard" resultType="com.bitc.java.dto.NoticeBoardDto" parameterType="int">
+		<![CDATA[ 
+			SELECT
+				*
+			FROM
+				notice_board
+			WHERE
+				idx=#{idx}	
+		]]>
+	</select>
+	<!-- 공지사항 추천 -->
+	<update id="noticeThumbsUp" parameterType="int">
+		<![CDATA[
+			UPDATE
+				notice_board
+			SET
+				thumbs_up=thumbs_up+1
+			WHERE
+				idx=#{idx}		
+		 ]]>	
+	</update>
+	
+		<!-- 공지사항 비추천 -->
+	<update id="noticeThumbsDown" parameterType="int">
+		<![CDATA[
+			UPDATE
+				notice_board
+			SET
+				thumbs_down=thumbs_down+1
+			WHERE
+				idx=#{idx}		
+		 ]]>	
+	</update>
+	
+	<!-- 조회수올리기 -->
+	<update id="addCnt" parameterType="int">
+		<![CDATA[ 
+			UPDATE
+				notice_board
+			SET
+				cnt=cnt+1
+			WHERE
+				idx=#{idx}	
+		]]>
+	</update>
+	<!-- 공지사항 업데이트-->
+	<update id="updateNoticeBoard" parameterType="com.bitc.java.dto.NoticeBoardDto">
+		<![CDATA[ 
+			UPDATE
+				notice_board
+			SET
+				title=#{title},content=#{content}
+			WHERE
+				idx=#{idx}
+		]]>
+	</update>
+	
+	<!-- 공지사항 삭제-->
+	<delete id="deleteNoticeBoard" parameterType="int">
+		<![CDATA[ 
+			DELETE
+			FROM
+				notice_board
+			WHERE
+				idx=#{idx}
+		]]>
+	</delete>
+	<!-- 자유게시판 글보기 -->
+	<select id="openUserBoard" resultType="com.bitc.java.dto.UserBoardDto">
+		<![CDATA[ 
+				SELECT
+				*			
+				FROM
+					user_board
+				ORDER BY 
+					origin_no DESC,group_ord,idx DESC
+			
+		]]>
+	</select >
+	
+	<!-- 자유게시판 글쓰기-->
+	<insert id="insertUserBoard" parameterType="com.bitc.java.dto.UserBoardDto">
+		<![CDATA[ 
+			INSERT INTO
+				user_board(origin_no,title,content,creator_id,created_dt)
+			VALUES((SELECT origin_no
+					FROM(SELECT MAX(origin_no)+1 AS origin_no FROM user_board) origin_no) 
+				    ,#{title},#{content},#{creatorId},NOW());
+		]]>
+	</insert >
+	
+	<!-- 자유게시판 자세히보기-->
+	<select id="openDetailUserBoard" parameterType="int" resultType="com.bitc.java.dto.UserBoardDto">
+		<![CDATA[ 
+				SELECT
+					*			
+				FROM
+					user_board
+				WHERE
+					idx=#{idx}	
+		]]>
+	</select >
+	
+	<!-- 자유게시판 댓글보기-->
+	<select id="openDetailComment" parameterType="int" resultType="com.bitc.java.dto.CommentDto">
+		<![CDATA[ 
+			SELECT 
+				*
+			FROM
+				comment
+			WHERE
+				board_key=#{idx}	
+		]]>
+	</select>
+	
+	<!-- 자유게시판 댓글입력 -->
+	<insert id="insertComment" parameterType="com.bitc.java.dto.CommentDto">
+		<![CDATA[ 
+			INSERT INTO
+				comment(board_key,comment,creator_id,created_dt)
+			VALUES
+				(#{boardKey},#{comment},#{creatorId},NOW())	
+		]]>
+	</insert>
+	
+	<!-- 자유게시판 댓글삭제-->
+	<delete id="deleteComment" parameterType="int">
+		<![CDATA[ 
+			DELETE
+			FROM
+				comment
+			WHERE
+				idx=#{idx}	
+				
+		]]>
+	</delete>
+	<!-- 공지사항 추천 -->
+	<update id="userThumbsUp" parameterType="int">
+		<![CDATA[
+			UPDATE
+				user_board
+			SET
+				thumbs_up=thumbs_up+1
+			WHERE
+				idx=#{idx}		
+		 ]]>	
+	</update>
+	
+		<!-- 공지사항 비추천 -->
+	<update id="userThumbsDown" parameterType="int">
+		<![CDATA[
+			UPDATE
+				user_board
+			SET
+				thumbs_down=thumbs_down+1
+			WHERE
+				idx=#{idx}		
+		 ]]>	
+	</update>
+	
+	<!-- 자유게시판 조회수올리기-->
+	<update id="useraddCnt" parameterType="int">
+		<![CDATA[ 
+			UPDATE
+				user_board
+			SET
+				cnt=cnt+1
+			WHERE
+				idx=#{idx}	
+		]]>
+	
+	</update>
+	
+	<!-- 자유게시판 수정하기-->
+	<update id="updateUserBoard" parameterType="com.bitc.java.dto.UserBoardDto">
+		<![CDATA[ 
+			UPDATE
+				user_board
+			SET
+				title=#{title},content=#{content}
+			WHERE
+				idx=#{idx}
+		]]>
+	</update>
+	
+	<!-- 자유게시판 삭제하기 -->
+	<delete id="deleteUserBoard" parameterType="int">
+		<![CDATA[ 
+			DELETE
+			FROM
+				user_board
+			WHERE
+				idx=#{idx}	
+		]]>
+	</delete>
+	
+	<!-- 답글 달기-->
+	<insert id="replyUserBoard" parameterType="com.bitc.java.dto.UserBoardDto">
+		<![CDATA[ 
+			INSERT INTO
+				user_board(origin_no,group_ord,title,content,creator_id,created_dt)
+			VALUES
+				(#{originNo},#{groupOrd}+1,#{title},#{content},#{creatorId},NOW())	
+		]]>
+	</insert >
+
+
+	<!-- 계정관리-->
+	
+	<!-- 로그인체크 -->
+	
+		<select id="loginCheck" parameterType="String" resultType="int">
+			<![CDATA[ 
+				SELECT
+					COUNT(user_id) AS NUM
+				FROM
+					member	
+				WHERE
+					user_id=#{userId} AND user_pw=#{userPw}	
+			]]>
+		</select>
+
+	
+		<!-- 관리자계정확인-->
+		<select id="getLevel" parameterType="String" resultType="int">
+			<![CDATA[ 
+				SELECT
+					level
+				FROM
+					member
+				WHERE
+					user_id=#{userId}		
+		
+			]]>
+		</select>
+		
+		<!-- 계정 생성 -->
+		<insert id="createAccount" parameterType="com.bitc.java.dto.MemberDto">
+			<![CDATA[ 
+				INSERT INTO
+					member(user_id,user_pw,user_name,user_email,level)	
+				VALUES(#{userId},#{userPw},#{userName},#{userEmail},2)
+			]]>
+		</insert>
+
+		
+		<!-- 아이디중복체크-->
+		<select id="IDCheck" parameterType="String" resultType="int">
+			<![CDATA[ 
+				SELECT
+				COUNT(user_id) AS cnt
+			FROM
+				member
+			WHERE
+				user_id=#{userId}
+			]]>
+		</select>
+	
+	<!-- 계정리스트열기 -->
+		<select id="openMemberList" resultType="com.bitc.java.dto.MemberDto">
+			<![CDATA[ 
+				SELECT
+					seq,user_id,user_pw,user_name,user_email,level
+				FROM
+					member
+				
+			]]>
+		</select>
+		
+		<!--계정 삭제하기 -->
+		<delete id="deleteAccount" parameterType="int">
+			<![CDATA[ 
+				DELETE
+				FROM
+					member
+				WHERE
+					seq=#{seq}
+			]]>
+		</delete>
+		
+		<!--계정 수정하기-->
+		<update id="updateAccount" parameterType="com.bitc.java.dto.MemberDto">
+			<![CDATA[ 
+				UPDATE
+					member
+				SET
+					user_id=#{userId},user_pw=#{userPw},user_name=#{userName},user_email=#{userEmail},level=#{level}
+				WHERE
+					seq=#{seq}	
+			]]>
+		</update>
+</mapper>
